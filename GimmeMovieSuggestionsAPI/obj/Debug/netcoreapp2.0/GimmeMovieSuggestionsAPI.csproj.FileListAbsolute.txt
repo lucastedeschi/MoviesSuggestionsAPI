@@ -1,0 +1,11 @@
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\bin\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.deps.json
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\bin\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.runtimeconfig.json
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\bin\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.runtimeconfig.dev.json
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\bin\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.dll
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\bin\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.pdb
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\obj\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.csproj.CoreCompileInputs.cache
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\obj\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.AssemblyInfoInputs.cache
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\obj\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.AssemblyInfo.cs
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\obj\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.dll
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\obj\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.pdb
+C:\Users\Lucas\Source\Repos\GimmeMovieSuggestionsAPI\GimmeMovieSuggestionsAPI\obj\Debug\netcoreapp2.0\GimmeMovieSuggestionsAPI.csprojResolveAssemblyReference.cache

@@ -9,7 +9,6 @@ namespace GimmeMovieSuggestionsAPI.Integrations.DTOs
     {
         public string UserEmail { get; set; }
         public string Audio { get; set; }
-        public int Page { get; set; }
-        public string OrderBy { get; set; }
+        public string Period { get; set; }
     }
 }

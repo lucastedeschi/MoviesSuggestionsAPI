@@ -28,7 +28,7 @@ namespace GimmeMovieSuggestionsAPI.Integrations
             }
         }
 
-        public static DiscoverDTO GetMovies(string with_genres, string page, string include_video, string include_adult, string sort_by)
+        public static DiscoverDTO GetMovies(string with_genres, int page, string include_video, string include_adult)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -46,7 +46,7 @@ namespace GimmeMovieSuggestionsAPI.Integrations
                 "&page=" + page +
                 "&include_video=" + include_video +
                 "&include_adult=" + include_adult +
-                "&sort_by=" + sort_by +
+                "&sort_by=popularity.desc" +
                 "&language=pt-BR&api_key=" + _key).Result;
 
                 string stringData = response.Content.ReadAsStringAsync().Result;

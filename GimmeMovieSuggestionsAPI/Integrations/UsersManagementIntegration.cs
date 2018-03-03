@@ -15,7 +15,7 @@ namespace GimmeMovieSuggestionsAPI.Integrations
         {
             using (HttpClient client = new HttpClient())
             {
-                client.BaseAddress = new Uri("http://localhost:3000");
+                client.BaseAddress = new Uri("https://shielded-lowlands-27093.herokuapp.com");
                 MediaTypeWithQualityHeaderValue contentType =  new MediaTypeWithQualityHeaderValue("application/json");
                 client.DefaultRequestHeaders.Accept.Add(contentType);
 

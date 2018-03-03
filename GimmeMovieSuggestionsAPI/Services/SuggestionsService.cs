@@ -14,7 +14,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             req = PrepareSuggestionRequest(req);
 
             var genresIds = ProccessGenres(req.Audio);
-            var periodGenres = ProccessPeriod(req.Period);
+            var periodGenres = ProccessTime(req.Time);
             var user = UsersManagementIntegration.GetUserByEmail(req.UserEmail);
 
             var movies = new List<MovieDTO>();
@@ -68,7 +68,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             return genresIds;
         }
 
-        private static string ProccessPeriod(string period)
+        private static string ProccessTime(string time)
         {
             var result = "";
             return result;

@@ -16,13 +16,13 @@ namespace GimmeMovieSuggestionsAPI.Controllers
         [HttpGet(Name = "Get")]
         public List<MovieDTO> Get([FromQuery(Name = "userEmail")] string userEmail,
             [FromQuery(Name = "audio")] string audio,
-            [FromQuery(Name = "period")] string period)
+            [FromQuery(Name = "time")] string time)
         {
             var req = new SuggestionRequest()
             {
                 UserEmail = userEmail,
                 Audio = audio,
-                Period = period
+                Time = time
             };
 
             return SuggestionsService.ProccessSuggestionRequest(req);

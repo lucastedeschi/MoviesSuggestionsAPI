@@ -13,6 +13,6 @@
 <ul>
 <li>Solicitar:</li>
 <p>
-GET: /suggestions/?userEmail=[example]&audio=[audio]&period=[periodo]
+GET: /suggestions/?userEmail=[example]&audio=[audio]&time=[horario(Formato: HH:mm)]
 </p>
 

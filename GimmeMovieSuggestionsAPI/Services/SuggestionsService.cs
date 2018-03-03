@@ -12,6 +12,7 @@ namespace GimmeMovieSuggestionsAPI.Services
         public static List<MovieDTO> ProccessSuggestionRequest(SuggestionRequest req)
         {
             req = PrepareSuggestionRequest(req);
+            var trailer = YouTubeIntegration.GetTrailerUrl("pantera negra");
 
             var genresIds = ProccessGenres(req.Audio);
             var periodGenres = ProccessTime(req.Time);
@@ -33,9 +34,20 @@ namespace GimmeMovieSuggestionsAPI.Services
                 page++;
             }
 
+            movies = PrepareMoviesTrailer(movies);
             movies = movies.OrderByDescending(x => x.Popularity).ToList();
 
             //procura na lista filmes que tenham o genero da hora, e reordena por isso
+
+            return movies;
+        }
+
+        private static List<MovieDTO> PrepareMoviesTrailer(List<MovieDTO> movies)
+        {
+            foreach(var movie in movies)
+            {
+                movie.Trailer = YouTubeIntegration.GetTrailerUrl(movie.Title);
+            }
 
             return movies;
         }

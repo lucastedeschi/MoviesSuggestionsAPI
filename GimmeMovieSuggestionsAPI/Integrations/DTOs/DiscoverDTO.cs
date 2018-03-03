@@ -29,8 +29,8 @@ namespace GimmeMovieSuggestionsAPI.Integrations.DTOs
         [JsonProperty("id")]
         public int Id { get; set; }
 
-        [JsonProperty("video")]
-        public bool Video { get; set; }
+        [JsonProperty("trailer")]
+        public TrailerDTO Trailer { get; set; }
 
         [JsonProperty("vote_average")]
         public decimal VoteAverage { get; set; }

@@ -18,7 +18,7 @@ namespace GimmeMovieSuggestionsAPI.Integrations
     {
         private static string _key = "AIzaSyAWE9jdXkfviP2DJB7WIDcMdT7ONubiwKA";
 
-        public static TrailerDTO GetTrailerUrl(string query)
+        public static TrailerDTO GetTrailer(string query)
         {
             var youtubeService = new YouTubeService(new BaseClientService.Initializer()
             {

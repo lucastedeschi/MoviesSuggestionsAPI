@@ -1,21 +1,25 @@
 ﻿using GimmeMovieSuggestionsAPI.Integrations;
 using GimmeMovieSuggestionsAPI.Integrations.DTOs;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GimmeMovieSuggestionsAPI.Services
 {
     public static class SuggestionsService
     {
+        private static IHostingEnvironment _hostingEnvironment;
+
         public static List<MovieDTO> ProccessSuggestionRequest(SuggestionRequest req)
         {
             req = PrepareSuggestionRequest(req);
-            var trailer = YouTubeIntegration.GetTrailerUrl("pantera negra");
+            var genresIds = ProccessGenresByText(req.Audio);
 
-            var genresIds = ProccessGenres(req.Audio);
-            var periodGenres = ProccessTime(req.Time);
             var user = UsersManagementIntegration.GetUserByEmail(req.UserEmail);
 
             var movies = new List<MovieDTO>();
@@ -34,22 +38,43 @@ namespace GimmeMovieSuggestionsAPI.Services
                 page++;
             }
 
-            movies = PrepareMoviesTrailer(movies);
             movies = movies.OrderByDescending(x => x.Popularity).ToList();
-
-            //procura na lista filmes que tenham o genero da hora, e reordena por isso
 
             return movies;
         }
 
-        private static List<MovieDTO> PrepareMoviesTrailer(List<MovieDTO> movies)
+        public static MovieDTO ProccessImFeelingLuckyRequest(SuggestionRequest req, IHostingEnvironment hostingEnvironment)
         {
-            foreach(var movie in movies)
+            _hostingEnvironment = hostingEnvironment;
+            var path = _hostingEnvironment.ContentRootPath + @"\AppData\TempMoviesBlacklist.txt";
+            CleanTempMoviesBlacklist(path);
+
+            var genresIds = ProccessGenresByTime(req.Time);
+
+            var user = UsersManagementIntegration.GetUserByEmail(req.UserEmail);
+
+            var movies = new List<MovieDTO>();
+            var page = 1;
+            var quantMovies = 1;
+
+            while (movies.Count < quantMovies)
             {
-                movie.Trailer = YouTubeIntegration.GetTrailerUrl(movie.Title);
+                var moviesResult = TheMovieDbIntegration.GetMovies(genresIds, page, "true", "false").Results;
+                if (moviesResult.Count == 0)
+                    continue;
+
+                int difference = quantMovies - movies.Count;
+                moviesResult = moviesResult.Take(difference).ToList();
+
+                movies.AddRange(FilterMoviesListByUser(moviesResult, user, true));
+                page++;
             }
 
-            return movies;
+            var res = movies.FirstOrDefault();
+
+            InsertTempMoviesBlacklist(req.UserEmail, res.Id, path);
+
+            return res;
         }
 
         private static SuggestionRequest PrepareSuggestionRequest(SuggestionRequest req)
@@ -58,35 +83,52 @@ namespace GimmeMovieSuggestionsAPI.Services
             return req;
         }
 
-        private static string ProccessGenres(string audio)
+        private static string ProccessGenresByText(string text)
         {
-            audio = RemoveSpecialsChars(audio.ToLower());
+            text = RemoveSpecialsChars(text.ToLower());
             var genres = TheMovieDbIntegration.GetGenres();
             var genresIds = "";
             
             foreach (var genre in genres.Genres)
             {
                 var genreNameLower = RemoveSpecialsChars(genre.Name.ToLower());
-                if (audio.Contains(genreNameLower))
+                if (text.Contains(genreNameLower))
                 {
                     if (genresIds.Equals(""))
                         genresIds = $"{genre.Id}";
                     else
                         genresIds = $"{genresIds},{genre.Id}";
-                    audio = audio.Replace(genreNameLower, "");
+                    text = text.Replace(genreNameLower, "");
                 }     
             }
 
             return genresIds;
         }
 
-        private static string ProccessTime(string time)
+        private static string ProccessGenresByTime(string time)
         {
-            var result = "";
-            return result;
+            try
+            {
+                var genres = TheMovieDbIntegration.GetGenres();
+
+                var timeSplitted = time.Split(":");
+                var hour = Convert.ToInt32(timeSplitted[0]);
+                var minutes = Convert.ToInt32(timeSplitted[1]);
+
+                if ((hour >= 20 && hour <= 23) || (hour >= 0 && hour <= 6))
+                    return ProccessGenresByText("Terror Suspense");
+
+                if (hour > 6 && hour < 20)
+                    return ProccessGenresByText("Ação Comedia Aventura Drama Romance");
+
+                return "";
+            } catch(Exception)
+            {
+                return "";
+            }
         }
 
-        private static List<MovieDTO> FilterMoviesListByUser(List<MovieDTO> movies, UserDTO user)
+        private static List<MovieDTO> FilterMoviesListByUser(List<MovieDTO> movies, UserDTO user, bool isLucky = false)
         {
             foreach (var item in user.Movies.Watched)
                 movies.RemoveAll(x => x.Id == item.Id);
@@ -97,10 +139,19 @@ namespace GimmeMovieSuggestionsAPI.Services
             foreach (var item in user.Movies.BlackList)
                 movies.RemoveAll(x => x.Id == item.Id);
 
+            if(isLucky)
+            {
+                var path = _hostingEnvironment.ContentRootPath + @"\AppData\TempMoviesBlacklist.txt";
+                var tempMoviesBlacklist = GetTempMoviesBlacklistByUserEmail(user.Email, path);
+
+                foreach (var item in tempMoviesBlacklist)
+                    movies.RemoveAll(x => x.Id == item);
+            }
+            
             return movies;
         }
 
-        public static string RemoveSpecialsChars(string texto)
+        private static string RemoveSpecialsChars(string texto)
         {
             string comAcentos = "ÄÅÁÂÀÃäáâàãÉÊËÈéêëèÍÎÏÌíîïìÖÓÔÒÕöóôòõÜÚÛüúûùÇç";
             string semAcentos = "AAAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUuuuuCc";
@@ -110,6 +161,55 @@ namespace GimmeMovieSuggestionsAPI.Services
                 texto = texto.Replace(comAcentos[i].ToString(), semAcentos[i].ToString());
             }
             return texto;
+        }
+
+        private static List<int> GetTempMoviesBlacklistByUserEmail(string userEmail, string path)
+        {
+            var moviesToBlock = new List<int>();
+            
+            string[] lines = File.ReadAllLines(path); 
+
+            foreach (string line in lines)
+            {
+                var lineSplitted = line.Split(";");
+                var email = lineSplitted[0];
+                var movieId = Convert.ToInt32(lineSplitted[1]);
+                var date = Convert.ToDateTime(lineSplitted[2]);
+
+                if (userEmail.Equals(email))
+                    moviesToBlock.Add(movieId);
+            }
+
+            return moviesToBlock;
+        }
+
+        private static void CleanTempMoviesBlacklist(string path)
+        {
+            string[] lines = File.ReadAllLines(path);
+            System.IO.File.WriteAllText(path, string.Empty);
+
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(path, true))
+            {
+                foreach (string line in lines)
+                {
+                    var lineSplitted = line.Split(";");
+                    var date = Convert.ToDateTime(lineSplitted[2]).AddDays(7);
+
+                    if (date > DateTime.UtcNow)
+                        file.WriteLine(line);
+                }
+            }
+        }
+
+        private static void InsertTempMoviesBlacklist(string userEmail, int movieId, string path)
+        {
+            string[] lines = File.ReadAllLines(path);
+
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(path, true))
+            {
+                var line = $"{userEmail};{movieId};{DateTime.UtcNow}";
+                file.WriteLine(line);
+            }
         }
     }
 }

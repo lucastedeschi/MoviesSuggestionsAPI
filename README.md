@@ -18,7 +18,7 @@ GET: /suggestions/?userEmail=[example]&audio=[audio]
   
 <li>Solicitar sugestões "Estou com sorte":</li>
 <p>
-GET: /suggestions/?userEmail=[example]&time=[horario(Formato: HH:mm)]
+GET: /suggestions/lucky/?userEmail=[example]&time=[horario(Formato: HH:mm)]
 </p>
 
 <li>Solicitar trailer:</li>

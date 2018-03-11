@@ -15,15 +15,15 @@
 <p>
 GET: /suggestions/?userEmail=[example]&audio=[audio]
 </p>
-
-<ul>
+  
 <li>Solicitar sugestões "Estou com sorte":</li>
 <p>
 GET: /suggestions/?userEmail=[example]&time=[horario(Formato: HH:mm)]
 </p>
 
-<ul>
 <li>Solicitar trailer:</li>
 <p>
 GET: /trailers/?movieName=[example]
 </p>
+
+ </ul>

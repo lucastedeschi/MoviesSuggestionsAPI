@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GimmeMovieSuggestionsAPI.Integrations;
 using GimmeMovieSuggestionsAPI.Integrations.DTOs;
 using GimmeMovieSuggestionsAPI.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GimmeMovieSuggestionsAPI.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class SuggestionsController : Controller
+    public class LuckyController : Controller
     {
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly ISuggestionService _suggestionService;
 
-        public SuggestionsController(
+        public LuckyController(
             IHostingEnvironment hostingEnvironment,
             ISuggestionService suggestionService)
         {
@@ -25,17 +25,17 @@ namespace GimmeMovieSuggestionsAPI.Controllers
             _suggestionService = suggestionService;
         }
 
-        [HttpGet(Name = "GetSuggestions")]
-        public List<MovieDTO> Get([FromQuery(Name = "userEmail")] string userEmail,
-            [FromQuery(Name = "audio")] string audio)
+        [HttpGet(Name = "GetLucky")]
+        public MovieDTO Get([FromQuery(Name = "userEmail")] string userEmail,
+            [FromQuery(Name = "time")] string time)
         {
             var req = new SuggestionRequest()
             {
                 UserEmail = userEmail,
-                Audio = audio
+                Time = time
             };
 
-            return _suggestionService.ProccessSuggestionRequest(req);
+            return _suggestionService.ProccessImFeelingLuckyRequest(req);
         }
     }
 }

@@ -11,11 +11,16 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace GimmeMovieSuggestionsAPI.Services
 {
-    public static class SuggestionsService
+    public class SuggestionService : ISuggestionService
     {
-        private static IHostingEnvironment _hostingEnvironment;
+        private readonly IHostingEnvironment _hostingEnvironment;
 
-        public static List<MovieDTO> ProccessSuggestionRequest(SuggestionRequest req)
+        public SuggestionService(IHostingEnvironment hostingEnvironment)
+        {
+            _hostingEnvironment = hostingEnvironment;
+        }
+
+        public List<MovieDTO> ProccessSuggestionRequest(SuggestionRequest req)
         {
             req = PrepareSuggestionRequest(req);
             var genresIds = ProccessGenresByText(req.Audio);
@@ -43,9 +48,8 @@ namespace GimmeMovieSuggestionsAPI.Services
             return movies;
         }
 
-        public static MovieDTO ProccessImFeelingLuckyRequest(SuggestionRequest req, IHostingEnvironment hostingEnvironment)
+        public MovieDTO ProccessImFeelingLuckyRequest(SuggestionRequest req)
         {
-            _hostingEnvironment = hostingEnvironment;
             var path = _hostingEnvironment.ContentRootPath + @"\AppData\TempMoviesBlacklist.txt";
             CleanTempMoviesBlacklist(path);
 
@@ -77,13 +81,13 @@ namespace GimmeMovieSuggestionsAPI.Services
             return res;
         }
 
-        private static SuggestionRequest PrepareSuggestionRequest(SuggestionRequest req)
+        private SuggestionRequest PrepareSuggestionRequest(SuggestionRequest req)
         {
             req.Audio = req.Audio.ToLower();
             return req;
         }
 
-        private static string ProccessGenresByText(string text)
+        private string ProccessGenresByText(string text)
         {
             text = RemoveSpecialsChars(text.ToLower());
             var genres = TheMovieDbIntegration.GetGenres();
@@ -105,7 +109,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             return genresIds;
         }
 
-        private static string ProccessGenresByTime(string time)
+        private string ProccessGenresByTime(string time)
         {
             try
             {
@@ -128,7 +132,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             }
         }
 
-        private static List<MovieDTO> FilterMoviesListByUser(List<MovieDTO> movies, UserDTO user, bool isLucky = false)
+        private List<MovieDTO> FilterMoviesListByUser(List<MovieDTO> movies, UserDTO user, bool isLucky = false)
         {
             foreach (var item in user.Movies.Watched)
                 movies.RemoveAll(x => x.Id == item.Id);
@@ -151,7 +155,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             return movies;
         }
 
-        private static string RemoveSpecialsChars(string texto)
+        private string RemoveSpecialsChars(string texto)
         {
             string comAcentos = "ÄÅÁÂÀÃäáâàãÉÊËÈéêëèÍÎÏÌíîïìÖÓÔÒÕöóôòõÜÚÛüúûùÇç";
             string semAcentos = "AAAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUuuuuCc";
@@ -163,7 +167,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             return texto;
         }
 
-        private static List<int> GetTempMoviesBlacklistByUserEmail(string userEmail, string path)
+        private List<int> GetTempMoviesBlacklistByUserEmail(string userEmail, string path)
         {
             var moviesToBlock = new List<int>();
             
@@ -183,7 +187,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             return moviesToBlock;
         }
 
-        private static void CleanTempMoviesBlacklist(string path)
+        private void CleanTempMoviesBlacklist(string path)
         {
             string[] lines = File.ReadAllLines(path);
             System.IO.File.WriteAllText(path, string.Empty);
@@ -201,7 +205,7 @@ namespace GimmeMovieSuggestionsAPI.Services
             }
         }
 
-        private static void InsertTempMoviesBlacklist(string userEmail, int movieId, string path)
+        private void InsertTempMoviesBlacklist(string userEmail, int movieId, string path)
         {
             string[] lines = File.ReadAllLines(path);
 

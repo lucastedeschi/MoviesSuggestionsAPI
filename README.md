@@ -2,7 +2,7 @@
 <p>
 
 <ul>
-  <li>Azure: <a>http://gimmesuggestions.us-west-2.elasticbeanstalk.com/<a/></li>
+  <li>Amazon Elastic Beanstalk Application: <a>http://gimmesuggestions.us-west-2.elasticbeanstalk.com/<a/></li>
 </ul>
 </p>
 

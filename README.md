@@ -24,7 +24,9 @@ GET: /suggestions/lucky/?userEmail=[example]&time=[horario(Formato: HH:mm)]
 <li>Solicitar trailer:</li>
 <p>
 GET: api/lucky/?movieName=batman
-RESPONSE:
+</p>
+<p>
+RESPONSE:</br>
   <code>
     {
     "id": "EXeTwQWrcwY",

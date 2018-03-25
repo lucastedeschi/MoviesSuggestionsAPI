@@ -2,7 +2,7 @@
 <p>
 
 <ul>
-  <li>Azure: <a>http://gimmesuggestions.us-west-2.elasticbeanstalk.com/api/<a/></li>
+  <li>Azure: <a>http://gimmesuggestions.us-west-2.elasticbeanstalk.com/<a/></li>
 </ul>
 </p>
 
@@ -23,7 +23,15 @@ GET: /suggestions/lucky/?userEmail=[example]&time=[horario(Formato: HH:mm)]
 
 <li>Solicitar trailer:</li>
 <p>
-GET: /trailers/?movieName=[example]
+GET: api/lucky/?movieName=batman
+RESPONSE:
+  <code>
+    {
+    "id": "EXeTwQWrcwY",
+    "url": "https://www.youtube.com/watch?v=EXeTwQWrcwY",
+    "title": "The Dark Knight (2008) Official Trailer #1 - Christopher Nolan Movie HD",
+    "thumbnail": "https://i.ytimg.com/vi/EXeTwQWrcwY/hqdefault.jpg"
+    }</code>
 </p>
 
  </ul>

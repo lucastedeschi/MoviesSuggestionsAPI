@@ -2,7 +2,7 @@
 <p>
 
 <ul>
-  <li>Azure: <a>http://gimmesuggestions.azurewebsites.net/api/<a/></li>
+  <li>Azure: <a>http://gimmesuggestions.us-west-2.elasticbeanstalk.com/api/<a/></li>
 </ul>
 </p>
 

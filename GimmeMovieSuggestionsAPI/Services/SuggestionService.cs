@@ -1,5 +1,6 @@
 ﻿using GimmeMovieSuggestionsAPI.Integrations;
 using GimmeMovieSuggestionsAPI.Integrations.DTOs;
+using GimmeMovieSuggestionsAPI.Integrations.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
@@ -14,10 +15,12 @@ namespace GimmeMovieSuggestionsAPI.Services
     public class SuggestionService : ISuggestionService
     {
         private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly ITempIntegration _tempIntegration;
 
-        public SuggestionService(IHostingEnvironment hostingEnvironment)
+        public SuggestionService(IHostingEnvironment hostingEnvironment, ITempIntegration tempIntegration)
         {
             _hostingEnvironment = hostingEnvironment;
+            _tempIntegration = tempIntegration;
         }
 
         public List<MovieDTO> ProccessSuggestionRequest(SuggestionRequest req)
@@ -50,35 +53,42 @@ namespace GimmeMovieSuggestionsAPI.Services
 
         public MovieDTO ProccessImFeelingLuckyRequest(SuggestionRequest req)
         {
-            var path = _hostingEnvironment.ContentRootPath + @"\AppData\TempMoviesBlacklist.txt";
-            CleanTempMoviesBlacklist(path);
+            _tempIntegration.DeleteOld();
 
             var genresIds = ProccessGenresByTime(req.Time);
 
             var user = UsersManagementIntegration.GetUserByEmail(req.UserEmail);
 
-            var movies = new List<MovieDTO>();
+            var movie = new MovieDTO();
             var page = 1;
-            var quantMovies = 1;
 
-            while (movies.Count < quantMovies)
+            while (movie.Id == 0)
             {
                 var moviesResult = TheMovieDbIntegration.GetMovies(genresIds, page, "true", "false").Results;
                 if (moviesResult.Count == 0)
+                {
+                    genresIds = "";
                     continue;
+                }
 
-                int difference = quantMovies - movies.Count;
-                moviesResult = moviesResult.Take(difference).ToList();
+                foreach (var movieResult in moviesResult)
+                {
+                    var moviesList = new List<MovieDTO> { movieResult };
+                    movie = FilterMoviesListByUser(moviesList, user, true).FirstOrDefault();
+                    if (movie != null)
+                        break;
+                }
 
-                movies.AddRange(FilterMoviesListByUser(moviesResult, user, true));
                 page++;
             }
 
-            var res = movies.FirstOrDefault();
-
-            InsertTempMoviesBlacklist(req.UserEmail, res.Id, path);
-
-            return res;
+            _tempIntegration.InsertOne(new TempMovieDTO()
+            {
+                MovieId = movie.Id,
+                UserEmail = user.Email,
+                CreatedOn = DateTime.Now
+            });
+            return movie;
         }
 
         private SuggestionRequest PrepareSuggestionRequest(SuggestionRequest req)
@@ -145,11 +155,10 @@ namespace GimmeMovieSuggestionsAPI.Services
 
             if(isLucky)
             {
-                var path = _hostingEnvironment.ContentRootPath + @"\AppData\TempMoviesBlacklist.txt";
-                var tempMoviesBlacklist = GetTempMoviesBlacklistByUserEmail(user.Email, path);
+                var tempMoviesBlacklist = _tempIntegration.FindByEmail(user.Email);
 
                 foreach (var item in tempMoviesBlacklist)
-                    movies.RemoveAll(x => x.Id == item);
+                    movies.RemoveAll(x => x.Id == item.MovieId);
             }
             
             return movies;
@@ -167,53 +176,5 @@ namespace GimmeMovieSuggestionsAPI.Services
             return texto;
         }
 
-        private List<int> GetTempMoviesBlacklistByUserEmail(string userEmail, string path)
-        {
-            var moviesToBlock = new List<int>();
-            
-            string[] lines = File.ReadAllLines(path); 
-
-            foreach (string line in lines)
-            {
-                var lineSplitted = line.Split(";");
-                var email = lineSplitted[0];
-                var movieId = Convert.ToInt32(lineSplitted[1]);
-                var date = Convert.ToDateTime(lineSplitted[2]);
-
-                if (userEmail.Equals(email))
-                    moviesToBlock.Add(movieId);
-            }
-
-            return moviesToBlock;
-        }
-
-        private void CleanTempMoviesBlacklist(string path)
-        {
-            string[] lines = File.ReadAllLines(path);
-            System.IO.File.WriteAllText(path, string.Empty);
-
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(path, true))
-            {
-                foreach (string line in lines)
-                {
-                    var lineSplitted = line.Split(";");
-                    var date = Convert.ToDateTime(lineSplitted[2]).AddDays(7);
-
-                    if (date > DateTime.UtcNow)
-                        file.WriteLine(line);
-                }
-            }
-        }
-
-        private void InsertTempMoviesBlacklist(string userEmail, int movieId, string path)
-        {
-            string[] lines = File.ReadAllLines(path);
-
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(path, true))
-            {
-                var line = $"{userEmail};{movieId};{DateTime.UtcNow}";
-                file.WriteLine(line);
-            }
-        }
     }
 }

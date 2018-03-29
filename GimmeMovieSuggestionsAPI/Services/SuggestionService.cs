@@ -1,6 +1,7 @@
 ﻿using GimmeMovieSuggestionsAPI.Integrations;
 using GimmeMovieSuggestionsAPI.Integrations.DTOs;
 using GimmeMovieSuggestionsAPI.Integrations.Interfaces;
+using GimmeMovieSuggestionsAPI.Utils;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
@@ -102,7 +103,9 @@ namespace GimmeMovieSuggestionsAPI.Services
             text = RemoveSpecialsChars(text.ToLower());
             var genres = TheMovieDbIntegration.GetGenres();
             var genresIds = "";
-            
+
+            text = text + new GenresSynonims().GetGenresBySynonims(text);
+
             foreach (var genre in genres.Genres)
             {
                 var genreNameLower = RemoveSpecialsChars(genre.Name.ToLower());

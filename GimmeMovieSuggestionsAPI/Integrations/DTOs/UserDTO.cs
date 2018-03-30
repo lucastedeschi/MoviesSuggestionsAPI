@@ -55,5 +55,10 @@ namespace GimmeMovieSuggestionsAPI.Integrations.DTOs
         [JsonProperty("rate")]
         public int? Rate { get; set; }
     }
+
+    public class UserDTOs
+    {
+        public List<UserDTO> Users { get; set; }
+    }
 }
 

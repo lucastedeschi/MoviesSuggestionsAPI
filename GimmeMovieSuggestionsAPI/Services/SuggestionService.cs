@@ -48,8 +48,34 @@ namespace GimmeMovieSuggestionsAPI.Services
             }
 
             movies = movies.OrderByDescending(x => x.Popularity).ToList();
+            movies = OrderMovies(movies);
 
             return movies;
+        }
+
+        private List<MovieDTO> OrderMovies(List<MovieDTO> movies)
+        {
+            try
+            {
+                var users = UsersManagementIntegration.GetUsers().Users;
+
+                foreach (var movie in movies)
+                {
+                    foreach (var user in users)
+                    {
+                        var movieWithSameId = user.Movies.Watched.Where(x => x != null && x.Id == movie.Id).FirstOrDefault();
+                        if (movieWithSameId != null && movieWithSameId.Rate != null)
+                            movie.GimmeUsersAverage = movieWithSameId.Rate.GetValueOrDefault();
+                    }
+                }
+
+                movies = movies.OrderByDescending(x => x.GimmeUsersAverage).ToList();
+                return movies;
+            } catch (Exception)
+            {
+                return movies; 
+            }
+            
         }
 
         public MovieDTO ProccessImFeelingLuckyRequest(SuggestionRequest req)
